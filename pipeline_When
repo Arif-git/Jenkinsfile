@@ -1,0 +1,41 @@
+pipeline{
+ agent any
+
+
+parameters{
+
+  string (defaultValue: 'Dev', description: 'Please Enter your environment', name: 'environment', trim: false)
+  choice (choices: ['yes', 'no'], description: 'Please choose to deploy yes/no', name: 'Select')
+
+}
+
+stages{
+  stage(Cloning_Script){
+
+    when {
+            expression {  params.Select != 'no'  }
+    }
+      steps{
+          sh "echo ${params.environment}"
+          sh "echo you have selected ${params.Select}"
+
+          git'https://github.com/kaza514/simple-webapp.git' 
+
+          }
+
+        }
+    }
+
+    post{
+        success {
+            echo"Sucessfully Deployed"
+        }
+        failure{
+            echo "Build Failed Email Sent"
+        }
+        unstable{
+            echo "I am Unastable Job"
+        }
+
+    }
+}
