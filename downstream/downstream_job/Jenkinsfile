@@ -1,0 +1,53 @@
+pipeline {
+    agent any
+
+    parameters {
+        string(defaultValue: "none", description: 'Enter Target Server Name', name: 'server_name')
+        booleanParam(name: 'to_deploy_to_environment', defaultValue: true, description: '')
+    }
+
+    environment {
+      project_name ='downstream_job2'
+    }
+
+    options {
+      buildDiscarder(logRotator(numToKeepStr: '16'))
+    }    
+
+stages {
+        
+        stage('Deploy the Code'){
+            steps {
+                 sh "echo Publishing to ${server_name}"
+                 echo 'Enter the Stepts to Deploy the code'
+                 echo "we are deploying to environment: ${params.to_deploy_to_environment}"
+            }
+        }
+
+
+        stage('test cond'){
+            steps{
+                script{
+                    if(${params.to_deploy_to_environment}.toBoolean()){  
+                    echo "Yes equal - running the stage"
+                     }      
+                    else {
+                    echo "Not equal - skipping the stage"
+                    }
+                }
+            }
+        }
+
+    }
+    post {
+        success {
+            echo 'Deployment was successful. Sending notification.'
+        }
+        unstable {
+            echo 'I am unstable :/'
+        }
+        failure {
+            echo 'Build failed. Slack notification.'
+        }
+    }    
+}
